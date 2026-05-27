@@ -2,6 +2,9 @@
 
 import { Button } from "@/components/ui/button";
 import { IconButton } from "@/components/ui/icon-button";
+import { ExportStlDialog } from "@/components/features/editor/export-stl-dialog";
+import { useStlExport } from "@/hooks/use-stl-export";
+import { useStlUpload } from "@/hooks/use-stl-upload";
 import type { EditorStatus } from "@/interfaces/editor.interface";
 import { useEditorStore } from "@/store/editor.store";
 import {
@@ -26,6 +29,8 @@ const titleClasses = "text-sm font-semibold text-neutral-900 dark:text-neutral-1
 const subtitleClasses = "text-xs text-neutral-500 dark:text-neutral-400";
 
 const actionsClasses = "flex items-center gap-2";
+
+const hiddenInputClasses = "hidden";
 
 const statusClasses =
   "hidden items-center gap-2 rounded-lg bg-neutral-100 px-3 py-1.5 sm:flex dark:bg-neutral-800";
@@ -57,10 +62,22 @@ const statusConfig: Record<
 export const EditorToolbar = () => {
   const status = useEditorStore((state) => state.status);
   const requestRun = useEditorStore((state) => state.requestRun);
+  const { fileInputRef, openFilePicker, handleFileChange } = useStlUpload();
+  const stlExport = useStlExport();
   const { label, dotClass } = statusConfig[status];
 
   return (
-    <header className={toolbarClasses}>
+    <>
+      <header className={toolbarClasses}>
+      <input
+        ref={fileInputRef}
+        type="file"
+        accept=".stl"
+        className={hiddenInputClasses}
+        onChange={handleFileChange}
+        aria-hidden
+        tabIndex={-1}
+      />
       <div className={logoClasses}>
         <div className={logoIconClasses}>
           <CubeIcon />
@@ -77,12 +94,17 @@ export const EditorToolbar = () => {
           <span className={statusTextClasses}>{label}</span>
         </div>
 
-        <Button variant="secondary" size="sm">
+        <Button variant="secondary" size="sm" onClick={openFilePicker}>
           <UploadIcon />
           Upload STL
         </Button>
 
-        <Button variant="secondary" size="sm">
+        <Button
+          variant="secondary"
+          size="sm"
+          onClick={stlExport.openDialog}
+          disabled={!stlExport.canExport}
+        >
           <DownloadIcon />
           Export STL
         </Button>
@@ -98,5 +120,20 @@ export const EditorToolbar = () => {
         </IconButton>
       </div>
     </header>
+
+      <ExportStlDialog
+        isOpen={stlExport.isOpen}
+        fileName={stlExport.fileName}
+        format={stlExport.format}
+        exportError={stlExport.exportError}
+        isExporting={stlExport.isExporting}
+        canExport={stlExport.canExport}
+        preview={stlExport.preview}
+        onClose={stlExport.closeDialog}
+        onFileNameChange={stlExport.setFileName}
+        onFormatChange={stlExport.setFormat}
+        onExport={stlExport.handleExport}
+      />
+    </>
   );
 };

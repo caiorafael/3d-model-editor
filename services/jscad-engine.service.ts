@@ -1,5 +1,15 @@
 import * as modeling from "@jscad/modeling";
 import type Geom3 from "@jscad/modeling/src/geometries/geom3/type";
+import type { StyledPart } from "@/interfaces/model-style.interface";
+import { TextFonts } from "@/lib/jscad-fonts/text-fonts.registry";
+import {
+  CutPlacement,
+  ModelBuilder,
+  ModelBuildResult,
+  ModelStyle,
+  TextStyle,
+} from "@/services/model-builder.service";
+import { DEFAULT_MODEL_COLOR_HEX } from "@/utils/color";
 
 interface JscadModule {
   main?: () => unknown;
@@ -18,20 +28,42 @@ const createJscadRequire = () => {
       ...modeling.extrusions,
       ...modeling.hulls,
       ...modeling.expansions,
+      ...modeling.text,
+      ModelBuilder,
+      ModelStyle,
+      TextStyle,
+      CutPlacement,
+      TextFonts,
       primitives: modeling.primitives,
       booleans: modeling.booleans,
       transforms: modeling.transforms,
       extrusions: modeling.extrusions,
       hulls: modeling.hulls,
+      expansions: modeling.expansions,
       measurements: modeling.measurements,
       colors: modeling.colors,
+      geometries: modeling.geometries,
+      text: modeling.text,
     };
   };
 };
 
-const collectGeometries = (result: unknown): Geom3[] => {
+const wrapGeometry = (geometry: Geom3): StyledPart => ({
+  geometry,
+  colorHex: DEFAULT_MODEL_COLOR_HEX,
+});
+
+const resolveStyledParts = (result: unknown): StyledPart[] => {
+  if (ModelBuildResult.isA(result)) {
+    return result.getParts();
+  }
+
+  if (ModelBuilder.isA(result)) {
+    return result.build().getParts();
+  }
+
   if (modeling.geometries.geom3.isA(result)) {
-    return [result];
+    return [wrapGeometry(result)];
   }
 
   if (Array.isArray(result)) {
@@ -40,14 +72,16 @@ const collectGeometries = (result: unknown): Geom3[] => {
     );
 
     if (geometries.length > 0) {
-      return geometries;
+      return geometries.map((geometry) => wrapGeometry(geometry));
     }
   }
 
-  throw new Error("main() must return a geometry or an array of geometries.");
+  throw new Error(
+    "main() must return a ModelBuildResult, ModelBuilder, geometry, or an array of geometries.",
+  );
 };
 
-export const executeJscadCode = (code: string): Geom3[] => {
+export const executeJscadCode = (code: string): StyledPart[] => {
   const requireFn = createJscadRequire();
   const moduleRef: JscadModule = {};
 
@@ -69,5 +103,5 @@ export const executeJscadCode = (code: string): Geom3[] => {
     throw new Error("Your code must export a main() function.");
   }
 
-  return collectGeometries(mainFn());
+  return resolveStyledParts(mainFn());
 };

@@ -4,7 +4,7 @@ import type { EditorState } from "@/interfaces/editor.interface";
 
 export const useEditorStore = create<EditorState>((set) => ({
   code: EXAMPLE_JSCAD_CODE,
-  meshData: null,
+  meshParts: null,
   modelStats: null,
   status: "idle",
   error: null,
@@ -15,10 +15,10 @@ export const useEditorStore = create<EditorState>((set) => ({
 
   setCode: (code) => set({ code }),
   setCursorPosition: (cursorPosition) => set({ cursorPosition }),
-  setExecutionResult: (meshData, modelStats) =>
-    set({ meshData, modelStats, status: "ready", error: null }),
+  setExecutionResult: (meshParts, modelStats) =>
+    set({ meshParts, modelStats, status: "ready", error: null }),
   setExecutionError: (error) =>
-    set({ status: "error", error, meshData: null, modelStats: null }),
+    set({ status: "error", error, meshParts: null, modelStats: null }),
   setStatus: (status) => set({ status }),
   toggleGrid: () => set((state) => ({ showGrid: !state.showGrid })),
   toggleWireframe: () => set((state) => ({ wireframe: !state.wireframe })),

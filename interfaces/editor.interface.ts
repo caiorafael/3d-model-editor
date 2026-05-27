@@ -6,6 +6,10 @@ export interface MeshData {
   indices: number[];
 }
 
+export interface ColoredMeshData extends MeshData {
+  color: string;
+}
+
 export interface ModelStats {
   width: number;
   height: number;
@@ -20,7 +24,7 @@ export interface CursorPosition {
 
 export interface EditorState {
   code: string;
-  meshData: MeshData | null;
+  meshParts: ColoredMeshData[] | null;
   modelStats: ModelStats | null;
   status: EditorStatus;
   error: string | null;
@@ -30,7 +34,10 @@ export interface EditorState {
   runTrigger: number;
   setCode: (code: string) => void;
   setCursorPosition: (position: CursorPosition) => void;
-  setExecutionResult: (meshData: MeshData, stats: ModelStats) => void;
+  setExecutionResult: (
+    meshParts: ColoredMeshData[],
+    stats: ModelStats,
+  ) => void;
   setExecutionError: (error: string) => void;
   setStatus: (status: EditorStatus) => void;
   toggleGrid: () => void;

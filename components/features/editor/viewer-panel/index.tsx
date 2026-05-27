@@ -29,7 +29,7 @@ const statClasses = "font-mono text-xs text-neutral-400 dark:text-neutral-500";
 const formatStat = (value: number) => value.toFixed(1);
 
 export const ViewerPanel = () => {
-  const meshData = useEditorStore((state) => state.meshData);
+  const meshParts = useEditorStore((state) => state.meshParts);
   const modelStats = useEditorStore((state) => state.modelStats);
   const status = useEditorStore((state) => state.status);
   const showGrid = useEditorStore((state) => state.showGrid);
@@ -68,7 +68,7 @@ export const ViewerPanel = () => {
 
       <div className={viewportClasses}>
         <ViewerCanvas
-          meshData={meshData}
+          meshParts={meshParts ?? []}
           showGrid={showGrid}
           wireframe={wireframe}
         />
@@ -79,7 +79,7 @@ export const ViewerPanel = () => {
           </div>
         )}
 
-        {!meshData && status !== "running" && (
+        {!meshParts && status !== "running" && (
           <div className={emptyStateClasses}>
             <span className={emptyTextClasses}>Write code to generate a model</span>
           </div>

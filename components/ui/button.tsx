@@ -5,6 +5,7 @@ interface ButtonProps {
   variant?: "primary" | "secondary" | "ghost" | "danger";
   size?: "sm" | "md";
   onClick?: () => void;
+  disabled?: boolean;
 }
 
 const baseClasses =
@@ -29,11 +30,13 @@ export const Button = ({
   variant = "primary",
   size = "md",
   onClick,
+  disabled = false,
 }: ButtonProps) => {
   return (
     <button
       type="button"
       onClick={onClick}
+      disabled={disabled}
       className={`${baseClasses} ${sizeClasses[size]} ${variantClasses[variant]}`}
     >
       {children}

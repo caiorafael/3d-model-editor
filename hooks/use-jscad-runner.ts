@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useMemo } from "react";
 import { executeJscadCode } from "@/services/jscad-engine.service";
 import {
-  convertGeometriesToMesh,
+  convertStyledPartsToMeshes,
   getModelStats,
 } from "@/services/geometry-converter.service";
 import { useEditorStore } from "@/store/editor.store";
@@ -22,10 +22,15 @@ export const useJscadRunner = () => {
     setStatus("running");
 
     try {
-      const geometries = executeJscadCode(code);
-      const meshData = convertGeometriesToMesh(geometries);
-      const modelStats = getModelStats(geometries);
-      setExecutionResult(meshData, modelStats);
+      const parts = executeJscadCode(code);
+      const meshParts = convertStyledPartsToMeshes(parts);
+
+      if (meshParts.length === 0) {
+        throw new Error("Generated geometry could not be converted to a valid mesh.");
+      }
+
+      const modelStats = getModelStats(parts.map((part) => part.geometry));
+      setExecutionResult(meshParts, modelStats);
     } catch (error) {
       const message =
         error instanceof Error ? error.message : "Failed to execute code.";
